@@ -12,7 +12,6 @@ on:
       staging-public-path:
         default: '/'
         type: string
-        description: 'publicPath для staging-билда (dev ветка). Prod всегда строится с /'
     secrets:
       YC_SA_KEY:
         required: true
