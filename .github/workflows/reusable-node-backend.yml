@@ -94,6 +94,11 @@ jobs:
           GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
           TAG=$(git rev-parse --short HEAD)
+          # Staging builds get a -staging suffix to avoid tag collision with prod builds
+          # when dev and master share the same commit SHA (e.g. hotfix pushed to both)
+          if [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            TAG="${TAG}-staging"
+          fi
           IMAGE="cr.yandex/crpm3o5it12l205kdqa4/${{ inputs.service-name }}:${TAG}"
           SECRET_ARGS=""
           if [ -n "$GH_PACKAGES_TOKEN" ]; then
