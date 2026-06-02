@@ -9,6 +9,10 @@ on:
       node-version:
         default: '20'
         type: string
+      staging-public-path:
+        default: '/'
+        type: string
+        description: 'publicPath для staging-билда (dev ветка). Prod всегда строится с /'
     secrets:
       YC_SA_KEY:
         required: true
@@ -42,7 +46,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Build
+      - name: Build (prod)
+        if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
+        run: quasar build
+
+      - name: Build (staging)
+        if: github.ref == 'refs/heads/dev'
+        env:
+          QUASAR_PUBLIC_PATH: ${{ inputs.staging-public-path }}
         run: quasar build
 
   build:
