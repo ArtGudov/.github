@@ -12,6 +12,10 @@ on:
       staging-public-path:
         default: '/'
         type: string
+      run-tests:
+        description: 'Run npm test. Off by default: не у всех Quasar-репозиториев есть тесты.'
+        default: false
+        type: boolean
     secrets:
       YC_SA_KEY:
         required: true
@@ -44,6 +48,10 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Test
+        if: ${{ inputs.run-tests }}
+        run: npm test
 
       - name: Build (prod)
         if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
