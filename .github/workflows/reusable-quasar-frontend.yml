@@ -16,6 +16,10 @@ on:
         description: 'Run npm test. Off by default: не у всех Quasar-репозиториев есть тесты.'
         default: false
         type: boolean
+    # YC_SA_KEY, MK_SSH_KEY, MK_SSH_HOST лежат в окружении `production` репозитория-сервиса,
+    # а не в его секретах: окружение отдаёт их только workflow из защищённой ветки (master).
+    # Сервис по-прежнему передаёт их по именам, а значение получают только задания ниже,
+    # где стоит `environment: production` (документация GitHub, «Reuse workflows»).
     secrets:
       YC_SA_KEY:
         required: true
@@ -67,7 +71,10 @@ jobs:
     name: Docker Build & Push
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
+    # Только master: сборке нужен YC_SA_KEY из окружения `production`, а оно с других веток
+    # недоступно. Стенд сгорел 08.10 — сборки и выкаты из dev вернутся вместе с ним (BL-133).
+    if: github.ref == 'refs/heads/master'
+    environment: production
     outputs:
       image: ${{ steps.build.outputs.image }}
       service: ${{ inputs.service-name }}
@@ -124,6 +131,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    environment: production
     steps:
       - name: Deploy to MK
         uses: appleboy/ssh-action@v1.0.3
